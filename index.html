@@ -1,0 +1,74 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <title>Videohub Presets</title>
+
+    <!--<link rel="stylesheet" href="css/styles.css?v=1.0">-->
+    <style>
+        body {
+            background: #222;
+        }
+        #main {
+            text-align: center;
+            padding-top: 20px;
+        }
+
+        a.scene-trigger {
+            padding: 30px;
+            display: inline-block;
+            background: #333;
+            color: #fff;
+            text-decoration: none;
+            margin-bottom: 30px;
+            font: 20px/1em sans-serif;
+        }
+
+        a.scene-trigger:hover {
+            background: #444;
+        }
+
+        a.scene-trigger span {
+            display: block;
+            font: 15px serif;
+            margin-top: 10px;
+            color: #aaa;
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="main"></div>
+
+<script>
+    const { ipcRenderer } = require('electron')
+    const $ = require('jquery')
+    const { IN, OUT, scenes } = require('./data')
+    const $main = $('#main')
+
+    for (const [sceneId, scene] of Object.entries(scenes)) {
+        const $scene = $(
+            '<div><a href="javascript:" class="scene-trigger""></a></div>'
+        )
+
+        $scene.children('a')
+            .text(`${sceneId} ${scene.name}`)
+            .html((i, html) => {
+                for (const [output, input] of Object.entries(scene.mapping)) {
+                    html += `<span>Input ${input} to output ${output}</span>`
+                }
+                return html
+            })
+            .click(function (e) {
+                const data = { scene: sceneId }
+                ipcRenderer.send('trigger-scene', data)
+            })
+
+        $scene.appendTo($main)
+    }
+</script>
+</body>
+</html>
